@@ -74,9 +74,24 @@ Here is the list of parameters that may affect later computational processes.
 
 6. Attach scintilator
 
+    Carefully attach the scintilator to the direct lens, that will be facing the beam.
+
+    > Scintilator may move while changing surroundings,
+    > i.e. sample, or drift during the measurement for some reason.
+    > It can affect the background normalization since scintilator doesn't have a constant spatial efficiency.
+    > Secure the scintilator as much as possible once it is mounted as you want.
+
 7. Align with the beam
 
+    Align the center of the lens and scintilator to beam.
+
+    <img src="laser_alignment.jpeg" width="200">
+
+    There should be enough space for a sample and a shield (if applicable).
+
 ### Open beam measurement (Background)
+
+### Siemens Star (Spatial Resolution)
 
 ### Sample Measurement (Signal)
 
