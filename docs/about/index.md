@@ -24,3 +24,8 @@ Simply download the archive, unzip and view locally in a web browser.
 ## Source code and development
 
 ESSimaging is hosted and developed [on GitHub](https://github.com/scipp/essimaging).
+
+## Related Instruments/Detectors
+
+- [Timepix Detector from Rosco Vision](timepix.md)
+- ODIN (Using Timepix detector)
