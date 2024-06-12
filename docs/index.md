@@ -13,4 +13,5 @@ hidden:
 api-reference/index
 developer/index
 about/index
+user-guide/index
 ```
