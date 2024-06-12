@@ -1,7 +1,7 @@
 # Timepix Detector
 
 Timepix detector uses a scintilator to detect neutrons.
-A scintilator is attached to a $45 \degree$ tilted mirror.
+A scintilator is attached to a :math:~`45 \degree` tilted mirror.
 
 ## Parameters
 
@@ -50,10 +50,19 @@ Here is the list of parameters that may affect later computational processes.
     All the apertures should be fully-open at the beginning
     since it is easier to see the effect of focusing when they are wider.
 
+    <img src="focusing.gif" width="200">
+
+    Each group of signals should shrink like the picture above as focusing is optimized.
+
+    <img src="focusing_siemens.png" width="200">
+
+    You can also use a complicated pattern like `Siemens Star` to adjust the focus.
 
 5. Image intensifier gain
 
-    **After making sure** that the lense is not exposed to the direct light, plug the power to the `image intensifier`.
+    **After making sure** that the lens is not exposed to the direct light, plug the power to the `image intensifier`.
+
+    Use `Zabier` to control the gain of the `image intensifier`.
 
 6. Attach scintilator
 
