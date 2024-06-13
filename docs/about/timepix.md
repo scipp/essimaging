@@ -1,7 +1,7 @@
 # Timepix Detector
 
 Timepix detector uses a scintilator to detect neutrons.
-A scintilator is attached to a :math:~`45 \degree` tilted mirror.
+A scintilator is attached to a $45 \degree$ tilted mirror.
 
 ## Parameters
 
@@ -13,20 +13,22 @@ Here is the list of parameters that may affect later computational processes.
   - Minimum number of photons to reconstruct neutrons with
   - Time window of clustering photons
   - Spatial clustering range of photons
+- Profile of the scintilator
+  - Marker in the scintilator if exist
 
 ## Example Experiment set-up with Timepix Detector (June. 2024 @ JParc, SENJU)
 
 ### Overview of the detector, sample set-up
-  ![IMAGE](overview_timepix.png)
+  ![IMAGE](timepix_images/overview_timepix.png)
 
 ### Preparation
 1. Mount detector components on a board.
 
-   <img src="overview_timepix_real.jpeg" width="400">
+   <img src="timepix_images/overview_timepix_real.jpeg" width="400">
 
 2. **EXCEPT FOR THE IMAGE INTENSIFIER**, connect powers/communication cables.
 
-    <img src="timepix_cables.JPG" width="400">
+    <img src="timepix_images/timepix_cables.JPG" width="400">
 
 3. Block leaking lights
 
@@ -34,14 +36,14 @@ Here is the list of parameters that may affect later computational processes.
 
     You can use `SoPhy` to monitor the image taken by the timepix in real-time.
 
-    <img src="light_leaking_monitor.gif" width="200">
+    <img src="timepix_images/light_leaking_monitor.gif" width="200">
 
     > `SoPhy` is written by [Amsterdam Scientific Instrument](https://www.amscins.com/)
     > but I couldn't find the documentation online.
 
     This time, wrapping aluminium tape was enough.
 
-    <img src="light_leaking.png" width="200">
+    <img src="timepix_images/light_leaking.png" width="200">
 
 4. Focusing
 
@@ -50,19 +52,19 @@ Here is the list of parameters that may affect later computational processes.
     All the apertures should be fully-open at the beginning
     since it is easier to see the effect of focusing when they are wider.
 
-    <img src="focusing.gif" width="200">
+    <img src="timepix_images/focusing.gif" width="200">
 
     Each group of signals should shrink like the picture above as focusing is optimized.
 
-    <img src="focusing_siemens.png" width="200">
+    <img src="timepix_images/focusing_siemens.png" width="200">
 
     You can also use a complicated pattern like `Siemens Star` to adjust the focus.
 
-    <img src="taping_lenses.png" width="200">
+    <img src="timepix_images/taping_lenses.png" width="200">
 
     Once focusing is done, gently fix the lenses with i.e. aluminium tape.
 
-5. Intensity saturation of image intensifier
+5. Optimizing image intensifier
 
     We need to find the intensity saturating points of the image intensifier.
 
@@ -71,6 +73,11 @@ Here is the list of parameters that may affect later computational processes.
     **After making sure** that the lens is not exposed to the direct light, plug the power to the `image intensifier`.
 
     Good starting gain is `0.6` and repeat a measurement until you find the saturating point.
+
+    > Pairwise comparison plot example with fake-data.
+    <img src="timepix_images/intensifier_optimization.svg">
+
+    In the example above, since the pair-wise comparison becomes flat at $0.7 V$, we can optimize the intensifier gain around that voltage.
 
 6. Attach scintilator
 
@@ -85,7 +92,7 @@ Here is the list of parameters that may affect later computational processes.
 
     Align the center of the lens and scintilator to beam.
 
-    <img src="laser_alignment.jpeg" width="200">
+    <img src="timepix_images/laser_alignment.jpeg" width="200">
 
     There should be enough space for a sample and a shield (if applicable).
 
