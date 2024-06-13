@@ -97,10 +97,16 @@ Here is the list of parameters that may affect later computational processes.
     There should be enough space for a sample and a shield (if applicable).
 
 ### Open beam measurement (Background)
+Open beam is measured without any samples for background normalization/substration.
+
+### Iron sample measurement (Reference)
+Iron sample is measured for bragg edge fitting of the other samples.
 
 ### Siemens Star (Spatial Resolution)
+Siemens start is used for measuring spatial resolution.
 
 ### Sample Measurement (Signal)
+This time, a battery sample was measured while charging/resting/decharging.
 
 ### Trouble Shooting
 - Scintilator
