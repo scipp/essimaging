@@ -1,15 +1,18 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2024 Scipp contributors (https://github.com/scipp)
+import glob
+import re
 import warnings
 from collections.abc import Callable, Generator, Iterable
 from enum import Enum
 from itertools import pairwise
 from pathlib import Path
-from typing import NewType
+from typing import NewType, TypeVar
 
+import numpy as np
 import scipp as sc
 import scippnexus as snx
-from tifffile import imwrite
+from tifffile import imread, imwrite
 
 from ess.reduce.nexus.types import FilePath
 
@@ -358,3 +361,65 @@ def export_image_stacks_as_tiff(
                 output_dir=output_path,
                 progress_wrapper=progress_wrapper,
             )
+
+
+ImageT = TypeVar("ImageT", bound=np.ndarray)
+
+
+# Originally from ``_load_images`` function in ``ess.v20.imaging.helper_funcs`` module.
+def _load_images(
+    image_dir: Path, extension: str, loader: Callable[[list[Path]], ImageT]
+) -> ImageT:
+    """Loads images from a directory."""
+    if not image_dir.is_dir():
+        raise ValueError(f"{image_dir} is not directory")
+    filenames = glob.glob(f"*.{extension}", root_dir=image_dir)
+    # Sort the filenames by converting the digits in the strings to integers
+    filenames.sort(key=lambda f: int(re.sub(r'\D', '', f)))
+    filenames = [image_dir / Path(f) for f in filenames]
+    return loader(filenames)
+
+
+def _load_tiffs(tiff_path: Path) -> np.ndarray:
+    if tiff_path.is_dir():
+        return _load_images(tiff_path, 'tiff', imread)
+    return imread(tiff_path)
+
+
+def _image_to_variable(
+    image_path: Path,
+    loader: Callable[[Path], np.ndarray],
+    dtype: type = np.float64,
+    with_variances: bool = True,
+    reshape: bool = False,
+) -> sc.Variable:
+    """Loads all images from a directory or a file as a scipp Variable."""
+    stack = loader(image_path)
+
+    if stack.size == 0:
+        raise RuntimeError(f'No images found in {image_path}')
+
+    data = stack.astype(dtype)
+    if reshape:
+        data = data.reshape(stack.shape[0], stack.shape[1] * stack.shape[2])
+        dims = ["t", "spectrum"]
+    else:
+        dims = ["t", "y", "x"]
+
+    var = sc.Variable(dims=dims, values=data, unit=sc.units.counts)
+    if with_variances:
+        var.variances = data
+
+    return var
+
+
+def tiff_to_variable(
+    image_dir: Path,
+    dtype: type = np.float64,
+    with_variances: bool = True,
+    reshape: bool = False,
+) -> sc.Variable:
+    """Loads all tiff images from a directory or a single file as a scipp Variable."""
+    return _image_to_variable(
+        image_dir, _load_tiffs, dtype, with_variances, reshape=reshape
+    )
