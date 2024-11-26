@@ -372,7 +372,7 @@ def _image_to_variable(
         raise RuntimeError(f'No images found in {image_path}')
     data = stack if dtype is None else stack.astype(dtype, copy=False)
     dims = [f"dim_{i}" for i in range(len(data.shape))][::-1]  # reverse order
-    var = sc.Variable(dims=dims, values=data, unit=sc.units.counts)
+    var = sc.array(dims=dims, values=data, unit=sc.units.counts)
     return var
 
 
