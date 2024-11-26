@@ -1,13 +1,11 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Copyright (c) 2024 Scipp contributors (https://github.com/scipp)
-import glob
-import re
 import warnings
-from collections.abc import Callable, Generator, Iterable, Sequence
+from collections.abc import Callable, Generator, Iterable
 from enum import Enum
 from itertools import pairwise
 from pathlib import Path
-from typing import NewType, TypeVar
+from typing import NewType
 
 import numpy as np
 import scipp as sc
@@ -363,65 +361,27 @@ def export_image_stacks_as_tiff(
             )
 
 
-ImageT = TypeVar("ImageT", bound=np.ndarray)
-
-
-# Originally from ``_load_images`` function in ``ess.v20.imaging.helper_funcs`` module.
-def _load_images(
-    image_dir: Path, extension: str, loader: Callable[[list[Path]], ImageT]
-) -> ImageT:
-    # TODO: Use this file name as a coordinate of 't' dimension.
-    """Loads images from a directory."""
-    if not image_dir.is_dir():
-        raise ValueError(f"{image_dir} is not directory")
-    filenames = glob.glob(f"*.{extension}", root_dir=image_dir)
-    try:
-        # Try sorting the filenames by converting the digits in the strings to integers
-        filenames.sort(key=lambda f: int(re.sub(r'\D', '', f)))
-    except ValueError:
-        filenames.sort()
-    filenames = [image_dir / Path(f) for f in filenames]
-    return loader(filenames)
-
-
-def _load_tiffs(tiff_path: Path) -> np.ndarray:
-    if tiff_path.is_dir():
-        return _load_images(tiff_path, 'tiff', imread)
-    return imread(tiff_path)
-
-
 def _image_to_variable(
-    *,
     image_path: Path,
-    dims: Sequence[str] = ("t", "y", "x"),
+    *,
     loader: Callable[[Path], np.ndarray],
-    dtype: type = np.float64,
-    with_variances: bool = True,
+    dtype: type | None = None,
 ) -> sc.Variable:
-    """Loads all images from a directory or a file as a scipp Variable."""
+    """Loads all images from a file as a scipp Variable."""
     if (stack := loader(image_path)).size == 0:
         raise RuntimeError(f'No images found in {image_path}')
-
-    data = stack.astype(dtype, copy=False)
+    data = stack if dtype is None else stack.astype(dtype, copy=False)
+    dims = [f"dim_{i}" for i in range(len(data.shape))][::-1]  # reverse order
     var = sc.Variable(dims=dims, values=data, unit=sc.units.counts)
-    if with_variances:
-        var.variances = data
-
     return var
 
 
-def tiff_to_variable(
-    *,
-    image_path: Path,
-    dims: Sequence[str] = ("t", "y", "x"),
-    dtype: type = np.float64,
-    with_variances: bool = True,
-) -> sc.Variable:
+def tiff_to_variable(image_path: Path, *, dtype: type | None = None) -> sc.Variable:
     """Loads all tiff images from a directory or a single file as a scipp Variable."""
-    return _image_to_variable(
-        image_path=image_path,
-        dims=dims,
-        loader=_load_tiffs,
-        dtype=dtype,
-        with_variances=with_variances,
-    )
+    return _image_to_variable(image_path, loader=imread, dtype=dtype)
+
+
+def load_tiff(image_path: Path, *, dtype: type | None = None) -> sc.DataArray:
+    """Loads all tiff images from a directory or a single file as a scipp DataArray."""
+    data = tiff_to_variable(image_path=image_path, dtype=dtype)
+    return sc.DataArray(data=data)
