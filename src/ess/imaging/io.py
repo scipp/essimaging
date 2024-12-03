@@ -367,7 +367,18 @@ def _image_to_variable(
     loader: Callable[[Path], np.ndarray],
     dtype: type | None = None,
 ) -> sc.Variable:
-    """Loads all images from a file as a scipp Variable."""
+    """Loads all images from a file as a scipp Variable.
+
+    Parameters
+    ----------
+    image_path:
+        Path to the image file.
+    loader:
+        Image loader function. It should take a file path and return a numpy array.
+    dtype:
+        Data type of the image data. If None, the data type is inferred from the image.
+
+    """
     if (stack := loader(image_path)).size == 0:
         raise RuntimeError(f'No images found in {image_path}')
     data = stack if dtype is None else stack.astype(dtype, copy=False)
@@ -377,11 +388,29 @@ def _image_to_variable(
 
 
 def tiff_to_variable(image_path: Path, *, dtype: type | None = None) -> sc.Variable:
-    """Loads all tiff images from a directory or a single file as a scipp Variable."""
+    """Loads all tiff images from a single file as a scipp Variable.
+
+    Parameters
+    ----------
+    image_path:
+        Path to the tiff file.
+    dtype:
+        Data type of the image data. If None, the data type is inferred from the image.
+
+    """
     return _image_to_variable(image_path, loader=imread, dtype=dtype)
 
 
 def load_tiff(image_path: Path, *, dtype: type | None = None) -> sc.DataArray:
-    """Loads all tiff images from a directory or a single file as a scipp DataArray."""
+    """Loads all tiff images from a single file as a scipp DataArray.
+
+    Parameters
+    ----------
+    image_path:
+        Path to the tiff file.
+    dtype:
+        Data type of the image data. If None, the data type is inferred from the image.
+
+    """
     data = tiff_to_variable(image_path=image_path, dtype=dtype)
     return sc.DataArray(data=data)
