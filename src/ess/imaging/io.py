@@ -401,7 +401,9 @@ def tiff_to_variable(image_path: Path, *, dtype: type | None = None) -> sc.Varia
     return _image_to_variable(image_path, loader=imread, dtype=dtype)
 
 
-def load_tiff(image_path: Path, *, dtype: type | None = None) -> sc.DataArray:
+def load_tiff(
+    image_path: Path, *, dtype: type | None = None, with_variances: bool = True
+) -> sc.DataArray:
     """Loads all tiff images from a single file as a scipp DataArray.
 
     Parameters
@@ -410,7 +412,15 @@ def load_tiff(image_path: Path, *, dtype: type | None = None) -> sc.DataArray:
         Path to the tiff file.
     dtype:
         Data type of the image data. If None, the data type is inferred from the image.
+    with_variances:
+        Assign variances based on the counts.
+        If ``True``, all counts are assigned as variances
+        since every counts is independent.
 
     """
     data = tiff_to_variable(image_path=image_path, dtype=dtype)
-    return sc.DataArray(data=data)
+    if with_variances:
+        data.variances = data.values
+        return sc.DataArray(data=data)
+    else:
+        return sc.DataArray(data=data)
