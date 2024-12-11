@@ -7,9 +7,10 @@ from itertools import pairwise
 from pathlib import Path
 from typing import NewType
 
+import numpy as np
 import scipp as sc
 import scippnexus as snx
-from tifffile import imwrite
+from tifffile import imread, imwrite
 
 from ess.reduce.nexus.types import FilePath
 
@@ -358,3 +359,70 @@ def export_image_stacks_as_tiff(
                 output_dir=output_path,
                 progress_wrapper=progress_wrapper,
             )
+
+
+def _image_to_variable(
+    image_path: Path,
+    *,
+    loader: Callable[[Path], np.ndarray],
+    dtype: type | None = None,
+) -> sc.Variable:
+    """Loads all images from a file as a scipp Variable.
+
+    Parameters
+    ----------
+    image_path:
+        Path to the image file.
+    loader:
+        Image loader function. It should take a file path and return a numpy array.
+    dtype:
+        Data type of the image data. If None, the data type is inferred from the image.
+
+    """
+    if (stack := loader(image_path)).size == 0:
+        raise RuntimeError(f'No images found in {image_path}')
+    data = stack if dtype is None else stack.astype(dtype, copy=False)
+    dims = [f"dim_{i}" for i in range(len(data.shape))][::-1]  # reverse order
+    var = sc.array(dims=dims, values=data, unit=sc.units.counts)
+    return var
+
+
+def tiff_to_variable(image_path: Path, *, dtype: type | None = None) -> sc.Variable:
+    """Loads all tiff images from a single file as a scipp Variable.
+
+    Parameters
+    ----------
+    image_path:
+        Path to the tiff file.
+    dtype:
+        Data type of the image data. If None, the data type is inferred from the image.
+
+    """
+    return _image_to_variable(image_path, loader=imread, dtype=dtype)
+
+
+def load_tiff(
+    image_path: Path, *, dtype: type | None = None, with_variances: bool = True
+) -> sc.DataArray:
+    """Loads all tiff images from a single file as a scipp DataArray.
+
+    Parameters
+    ----------
+    image_path:
+        Path to the tiff file.
+    dtype:
+        Data type of the image data. If None, the data type is inferred from the image.
+    with_variances:
+        Assign variances based on the counts.
+        If ``True``, all counts are assigned as variances
+        since every counts is independent.
+        Zero counts are assigned with variance of 1.
+
+    """
+    data = tiff_to_variable(image_path=image_path, dtype=dtype)
+    if with_variances:
+        data.variances = data.values
+        data.variances[data.values == 0] = 1
+        return sc.DataArray(data=data)
+    else:
+        return sc.DataArray(data=data)

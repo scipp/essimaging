@@ -19,6 +19,9 @@ def _make_pooch():
             'small_mcstas_sample_images.h5': 'md5:3c42570951cabec7caedc76d90d03fa3',
             'small_ymir_images.hdf': 'md5:cf83695d5da29e686c10a31b402b8bdb',
             'README.md': 'md5:9e1beeb325f127d691a8d7882db3255d',
+            'small_fe_timepix_image.tiff': 'md5:a7f6b38375433c6ffd5d7832919265cd',
+            'small_ob_timepix_image.tiff': 'md5:624508c2d770c92c769c782355cefc1b',
+            'README_small_timepix_image.md': 'md5:4267a225c19a60b366dde0ee1aa62dc9',
         },
     )
 
@@ -60,3 +63,27 @@ def get_mcstas_sample_images_path() -> pathlib.Path:
     """
 
     return get_path('small_mcstas_sample_images.h5')
+
+
+def get_fe_timepix_image_path() -> pathlib.Path:
+    """
+    Return the path to the small FE Timepix image TIFF file.
+    """
+
+    return get_path('small_fe_timepix_image.tiff')
+
+
+def get_ob_timepix_image_path() -> pathlib.Path:
+    """
+    Return the path to the small OB Timepix image TIFF file.
+    """
+
+    return get_path('small_ob_timepix_image.tiff')
+
+
+def get_timepix_image_readme_path() -> pathlib.Path:
+    """
+    Return the path to the README for the small Timepix image files.
+    """
+
+    return get_path('README_small_timepix_image.md')
