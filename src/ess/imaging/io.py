@@ -416,11 +416,13 @@ def load_tiff(
         Assign variances based on the counts.
         If ``True``, all counts are assigned as variances
         since every counts is independent.
+        Zero counts are assigned with variance of 1.
 
     """
     data = tiff_to_variable(image_path=image_path, dtype=dtype)
     if with_variances:
         data.variances = data.values
+        data.variances[data.values == 0] = 1
         return sc.DataArray(data=data)
     else:
         return sc.DataArray(data=data)
