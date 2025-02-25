@@ -49,6 +49,12 @@ test = [
     "pytest",
     "pooch",
 ]
+gui = [
+    "textual",
+]
+
+[project.scripts]
+essimaging = "ess.imaging.executable:main"
 
 [project.urls]
 "Bug Tracker" = "https://github.com/scipp/essimaging/issues"
