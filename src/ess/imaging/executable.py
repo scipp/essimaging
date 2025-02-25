@@ -1,6 +1,7 @@
 try:
     import textual
     import textual.binding
+    import textual.containers
     import textual.widgets
     from textual.app import App, ComposeResult
 except ImportError as e:
@@ -12,10 +13,18 @@ except ImportError as e:
 from typing import ClassVar
 
 
+class FileExplorer(textual.containers.Horizontal):
+    def compose(self) -> ComposeResult:
+        yield textual.widgets.DirectoryTree(path=".")
+        yield textual.containers.Container(textual.widgets.Pretty(''))
+
+
 class ESSImagingApp(App):
     BINDINGS: ClassVar = [("q", "quit", "Exit the app")]
 
     def compose(self) -> ComposeResult:
+        yield textual.widgets.Header(show_clock=True)
+        yield FileExplorer()
         yield textual.widgets.Footer()
 
 
