@@ -181,7 +181,7 @@ def calculate_scale_factor(
 def apply_threshold_to_sample_images(
     samples: CleansedSampleImages, sample_threshold: SamplePixelThreshold
 ) -> SampleImageStacks:
-    """Apply masks based on the threshold to the sample image stack.
+    """Apply a mask based on the threshold to the sample image stack.
 
     Parameters
     ----------
@@ -202,7 +202,7 @@ def apply_threshold_to_sample_images(
 def apply_threshold_to_background_image(
     background: CleansedOpenBeamImage, background_threshold: BackgroundPixelThreshold
 ) -> BackgroundImage:
-    """Apply masks based on the threshold to the background image.
+    """Apply a mask based on the threshold to the background image.
 
     Parameters
     ----------
