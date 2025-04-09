@@ -190,8 +190,7 @@ def apply_threshold_to_sample_images(
 
     sample_threshold:
         Threshold for the sample pixel values.
-        Any pixel values less than ``sample_threshold``
-        are replaced with ``sample_threshold``.
+        Any pixel values less than ``sample_threshold`` will be masked.
 
     """
     samples = CleansedSampleImages(samples.copy(deep=False))
@@ -211,8 +210,7 @@ def apply_threshold_to_background_image(
 
     background_threshold:
         Threshold for the background pixel values.
-        Any pixel values less than ``background_threshold``
-        are replaced with ``background_threshold``.
+        Any pixel values less than ``background_threshold`` will be masked.
 
     """
     background = CleansedOpenBeamImage(background.copy(deep=False))
