@@ -216,14 +216,14 @@ def test_apply_threshold_to_background_image() -> None:
     threshold = sc.scalar(1.0, unit="counts")
     mask = sc.array(dims=["dim_1", "dim_2"], values=[[False, False], [False, True]])
     thresholded_background_image = apply_threshold_to_background_image(
-        CleansedOpenBeamImage(background_image_with_negative_values),
+        CleansedOpenBeamImage(background_image_with_zeros),
         BackgroundPixelThreshold(threshold),
     )
     with pytest.raises(AssertionError, match="Arrays are not equal"):
-        assert_identical(background_image_with_negative_values.data.min(), threshold)
+        assert_identical(background_image_with_zeros.data.min(), threshold)
     assert_identical(
         thresholded_background_image,
-        background_image_with_negative_values.assign_masks(counts=mask),
+        background_image_with_zeros.assign_masks(counts=mask),
     )
 
 
