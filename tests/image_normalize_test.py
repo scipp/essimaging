@@ -205,7 +205,7 @@ def test_apply_threshold_to_sample_images() -> None:
 
 
 def test_apply_threshold_to_background_image() -> None:
-    background_image_with_negative_values = sc.DataArray(
+    background_image_with_zeros = sc.DataArray(
         data=sc.array(
             dims=["dim_1", "dim_2"],
             values=[[3.0, 3.0], [3.0, 0.0]],
