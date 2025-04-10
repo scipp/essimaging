@@ -193,9 +193,9 @@ def apply_threshold_to_sample_images(
         Any pixel values less than ``sample_threshold`` will be masked.
 
     """
-    samples = CleansedSampleImages(samples.copy(deep=False))
-    samples.masks['counts'] = samples.data < sample_threshold
-    return SampleImageStacks(samples)
+    return SampleImageStacks(
+        samples.assign_masks(counts=samples.data < sample_threshold)
+    )
 
 
 def apply_threshold_to_background_image(
@@ -213,9 +213,9 @@ def apply_threshold_to_background_image(
         Any pixel values less than ``background_threshold`` will be masked.
 
     """
-    background = CleansedOpenBeamImage(background.copy(deep=False))
-    background.masks['counts'] = background.data < background_threshold
-    return BackgroundImage(background)
+    return BackgroundImage(
+        background.assign_masks(counts=background.data < background_threshold)
+    )
 
 
 def normalize_sample_images(
