@@ -6,6 +6,7 @@ Contains the providers to compute neutron time-of-flight and wavelength.
 
 import sciline as sl
 import scippneutron as scn
+import scippnexus as snx
 
 from ess.reduce import time_of_flight
 
@@ -17,6 +18,7 @@ from .types import (
     DistanceResolution,
     LookupTableRelativeErrorThreshold,
     LtotalRange,
+    Position,
     PulsePeriod,
     PulseStride,
     PulseStrideOffset,
@@ -62,7 +64,9 @@ def extract_detector_ltotal(
     return DetectorLtotal[RunType](with_ltotal.coords["Ltotal"])
 
 
-def simulate_chopper_cascade(choppers: Choppers[SampleRun]) -> SimulationResults:
+def simulate_chopper_cascade(
+    choppers: Choppers[SampleRun], source_position: Position[snx.NXsource, SampleRun]
+) -> SimulationResults:
     """
     Simulate neutrons traveling through the chopper cascade.
 
@@ -71,7 +75,9 @@ def simulate_chopper_cascade(choppers: Choppers[SampleRun]) -> SimulationResults
     choppers:
         Chopper settings.
     """
-    return time_of_flight.simulate_beamline(choppers=choppers, neutrons=200_000)
+    return time_of_flight.simulate_beamline(
+        choppers=choppers, neutrons=200_000, source_position=source_position
+    )
 
 
 def build_tof_lookup_table(

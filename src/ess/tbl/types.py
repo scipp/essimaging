@@ -28,6 +28,7 @@ MonitorData = reduce_t.MonitorData
 NeXusDetectorName = reduce_t.NeXusDetectorName
 NeXusMonitorName = reduce_t.NeXusName
 NeXusComponent = reduce_t.NeXusComponent
+Position = reduce_t.Position
 SampleRun = reduce_t.SampleRun
 
 PulsePeriod = tof_t.PulsePeriod
