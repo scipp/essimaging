@@ -7,11 +7,13 @@ from itertools import pairwise
 from pathlib import Path
 from typing import NewType
 
+import numpy as np
 import scipp as sc
 import scippnexus as snx
+from PIL import Image
 from tifffile import imwrite
 
-from ess.reduce.nexus.types import FilePath
+from ess.reduce.nexus.types import Filename, FilePath, RunType
 
 from .types import (
     DEFAULT_HISTOGRAM_PATH,
@@ -358,3 +360,23 @@ def export_image_stacks_as_tiff(
                 output_dir=output_path,
                 progress_wrapper=progress_wrapper,
             )
+
+
+def load_image(fname: Filename[RunType]):
+    with Image.open(fname) as im:
+        da = sc.DataArray(
+            # I don't know if any image data is stored as uint32 or int64
+            # or some other dtype that has a range exceeding int32.
+            # Often images are stored as uint8 or uint16, and that fits in int32.
+            # It is wasteful to store the data in int32 if it fits in uint8,
+            # but scipp does not support those dtypes yet.
+            sc.array(dims=('y', 'x', 'channel'), values=np.array(im).astype('int32'))
+        )
+    return da
+
+
+def save_image(data, fname, **kwargs):
+    # Might raise if the data type does not match
+    # what pillow expects
+    im = Image.fromarray(data.data.values)
+    return im.save(fname, **kwargs)
