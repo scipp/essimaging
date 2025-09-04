@@ -364,13 +364,17 @@ def export_image_stacks_as_tiff(
 
 def load_image(fname: Filename[RunType]):
     with Image.open(fname) as im:
+        data = np.array(im).astype('int32')
         da = sc.DataArray(
             # I don't know if any image data is stored as uint32 or int64
             # or some other dtype that has a range exceeding int32.
             # Often images are stored as uint8 or uint16, and that fits in int32.
             # It is wasteful to store the data in int32 if it fits in uint8,
             # but scipp does not support those dtypes yet.
-            sc.array(dims=('y', 'x', 'channel'), values=np.array(im).astype('int32'))
+            sc.array(
+                dims=('y', 'x', 'channel') if data.ndim == 3 else ('y', 'x'),
+                values=data,
+            )
         )
     return da
 
