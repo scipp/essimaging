@@ -1,4 +1,6 @@
+import numpy as np
 import scipp as sc
+from numpy.typing import NDArray
 
 
 def maximum_resolution_achievable(
@@ -112,3 +114,121 @@ def maximum_resolution_achievable(
             lower_ny,
         ),
     )
+
+
+def _radial_profile(data: NDArray):
+    '''Integrate ellipses around center of image.'''
+    y, x = np.indices(data.shape)
+    cy, cx = np.array(data.shape) / 2.0
+    r = np.hypot((cx * cy) ** 0.5 * (x - cx) / cx, (cx * cy) ** 0.5 * (y - cy) / cy)
+    r = r.astype(np.int32)
+    tbin = np.bincount(r.ravel(), data.ravel())
+    nr = np.bincount(r.ravel())
+    return tbin / (nr + 1e-15)
+
+
+def modulation_transfer_function(
+    measured_image: sc.DataArray,
+    open_beam_image: sc.DataArray,
+    target: sc.DataArray,
+) -> sc.DataArray:
+    '''
+    Computes the modulation transfer function (MTF) of
+    the camera given a measured image and the
+    ideal image that would have been captured if
+    the instrument had infinite resolution.
+
+    Parameters
+    ------------
+    measured_image:
+        The image of the sample captured by the camera.
+    open_beam_image:
+        The image without the sample captured by the camera.
+    target:
+        A perfect image of the sample
+        on the same grid as `measured_image`.
+
+    Returns
+    ------------
+    :
+        The modulation transfer function as a function
+        of "frequency" representing "line pairs" per pixel.
+    '''
+    _measured = measured_image.values
+    # Can't do inplace because dtype of sum might be different from dtype of input
+    _measured = _measured / _measured.sum()
+    _reference = (open_beam_image * target).to(unit=measured_image.unit).values
+    _reference = _reference / _reference.sum()
+    f_ideal = np.abs(np.fft.fftshift(np.fft.fft2(_reference)))
+    f_measured = np.abs(np.fft.fftshift(np.fft.fft2(_measured)))
+    _mtf = _radial_profile(f_measured) / _radial_profile(f_ideal)
+    return sc.DataArray(
+        sc.array(dims=['frequency'], values=_mtf),
+        # Unit of frequency is line_pairs / pixel but since both of those are
+        # a kind of counts I think in our unit system that is best
+        # represented as 'dimensionless'.
+        coords={'frequency': sc.linspace('frequency', 0, (1 / 2) ** 0.5, len(_mtf))},
+        # We're only interested in frequencies below 0.5 oscillations per pixel
+    )['frequency', : sc.scalar(0.5)]
+
+
+def estimate_cut_off_frequency(mtf: sc.DataArray) -> sc.Variable:
+    '''Estimates the cut off frequency of
+    the modulation transfer function (mtf).
+
+    Parameters
+    -------------
+    mtf:
+        A (potentially noisy) modulation transfer function curve
+        having a coordinate named "frequency".
+
+    Returns
+    -------------
+    :
+        An estimate of the frequency where the modulation
+        transfer function goes to zero, the "cut off frequency".
+    '''
+    _freq = np.concat([[0.0], mtf.coords['frequency'].values])
+    _mtf = np.concat([[1.0], mtf.values])
+    # The line should go through (0, 1), so give it a big weight.
+    w = np.concat([[10 * len(mtf)], np.ones(len(mtf))])
+    m = np.ones(len(_freq), dtype='bool')
+    fc = np.nan
+    maxiters = 100
+    for _ in range(maxiters):
+        p = np.polyfit(_freq[m], _mtf[m], 1, w=w[m])
+        if abs(-p[1] / p[0] - fc) < 1e-4:
+            break
+        fc = -p[1] / p[0]
+        m = np.polyval(p, _freq) >= 0
+    # Correction factor 9/8 is the ratio between where a linear approximation
+    # of the MTF of a circular apparture crosses 0 and where the actual cutoff frequency
+    # of the same circular apparture is.
+    # For reference:
+    # import sympy as sp
+    # x, f, a = sp.symbols('x, f, a', positive=True)
+    # sp.solve(sp.integrate(sp.diff((1 - a * x - 2 / sp.pi * (sp.acos(x/f) - x/f * sp.sqrt(1 - x**2/f**2)))**2, a), (x, 0, f)), f)  # noqa: E501
+    return 9 / 8 * sc.scalar(-p[1] / p[0], unit=mtf.coords['frequency'].unit)
+
+
+def mtf_less_than(mtf: sc.DataArray, limit: float) -> sc.Variable:
+    '''Computes the frequency where the
+    modulation transfer function goes below ``limit``.
+
+    Parameters
+    --------------
+    mtf:
+        A (potentially noisy) modulation transfer function curve
+        having a coordinate named "frequency".
+
+    limit:
+        The modulation transfer function value at the returned frequency.
+
+    Returns
+    -----------
+    :
+        The frequency where the modulation transfer function goes below "limit".
+    '''
+    _freq = mtf.coords['frequency'].values
+    _mtf = mtf.values
+    return sc.scalar(_freq[_mtf <= limit].min(), unit=mtf.coords['frequency'].unit)
