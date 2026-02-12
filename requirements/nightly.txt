@@ -38,7 +38,7 @@ essreduce @ git+https://github.com/scipp/essreduce@main
     # via -r nightly.in
 fonttools==4.61.1
     # via matplotlib
-fsspec==2026.1.0
+fsspec==2026.2.0
     # via dask
 graphviz==0.21
     # via -r nightly.in
@@ -93,7 +93,7 @@ packaging==26.0
     #   pytest
 partd==1.4.2
     # via dask
-pillow==12.1.0
+pillow==12.1.1
     # via matplotlib
 platformdirs==4.5.1
     # via pooch

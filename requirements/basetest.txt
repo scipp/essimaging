@@ -49,11 +49,11 @@ packaging==26.0
     #   matplotlib
     #   pooch
     #   pytest
-pillow==12.1.0
+pillow==12.1.1
     # via matplotlib
 platformdirs==4.5.1
     # via pooch
-plopp==25.11.0
+plopp==26.2.0
     # via tof
 pluggy==1.6.0
     # via pytest
