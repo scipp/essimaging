@@ -70,3 +70,47 @@ def test_finds_maximum_resolution_random(seed):
         .value
         == 0
     )
+
+
+def test_finds_maximum_resolution_binned_input():
+    np.random.seed(0)
+    n = np.random.randint(1000, 100_000)
+    events = sc.DataArray(
+        sc.ones(dims=['events'], shape=(n,)),
+        coords={
+            'x': sc.array(dims=['events'], values=np.random.random(n)),
+            'y': sc.array(dims=['events'], values=np.random.random(n)),
+            't': sc.array(dims=['events'], values=np.random.random(n)),
+        },
+    )
+    events = events.bin(x=4000, y=4000)
+    del events.bins.coords['x']
+    del events.bins.coords['y']
+    x_be, y_be = maximum_resolution_achievable(
+        events,
+        sc.linspace('x', 0, 1, 2),
+        sc.linspace('y', 0, 1, 2),
+        sc.linspace('t', 0, 1, 500),
+        # Need enough tries to be sure we find the optimum
+        max_tries=100,
+    )
+
+    assert (
+        events.bin(x=x_be, y=y_be, t=sc.linspace('t', 0, 1, 500), dim=events.dims)
+        .bins.size()
+        .min()
+        .value
+        > 0
+    )
+    assert (
+        events.bin(
+            x=sc.linspace('x', 0, 1, len(x_be) + 1),
+            y=sc.linspace('y', 0, 1, len(y_be) + 1),
+            t=sc.linspace('t', 0, 1, 500),
+            dim=events.dims,
+        )
+        .bins.size()
+        .min()
+        .value
+        == 0
+    )

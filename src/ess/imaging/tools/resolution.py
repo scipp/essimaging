@@ -59,7 +59,14 @@ def maximum_resolution_achievable(
 
     nx = int(2**0.5 * lower_nx) + 1
     ny = int(2**0.5 * lower_ny) + 1
-    events = events.bin({time_bin_edges.dim: time_bin_edges})
+
+    if events.bins is not None:
+        events = events.copy(deep=False)
+        # Add the x and y coords as event coordinates.
+        for c in (coarse_x_bin_edges.dim, coarse_y_bin_edges.dim):
+            events.bins.coords[c] = sc.bins_like(events, sc.midpoints(events.coords[c]))
+
+    events = events.bin({time_bin_edges.dim: time_bin_edges}, dim=events.dims)
 
     for _ in range(max_tries):
         xbins = sc.linspace(
