@@ -50,7 +50,7 @@ smmap==5.0.3
     # via gitdb
 tomli-w==1.2.0
     # via tox
-tox==4.52.1
+tox==4.53.0
     # via -r ci.in
 urllib3==2.6.3
     # via requests
