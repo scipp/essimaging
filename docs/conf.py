@@ -286,5 +286,5 @@ linkcheck_ignore = [
 # -- Redirect to new docs --------------------------------------------------
 
 redirects = {
-    "*": "https://scipp.github.io/ess/essimaging/$source.html",
+    "*": "https://scipp.github.io/ess/imaging/$source.html",
 }
