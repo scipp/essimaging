@@ -9,6 +9,7 @@ sphinx
 sphinx-autodoc-typehints
 sphinx-copybutton
 sphinx-design
+sphinx-reredirects
 pooch
 tqdm
 tof  # For WFM stitching documentation.
